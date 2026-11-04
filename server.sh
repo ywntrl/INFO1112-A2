@@ -20,7 +20,7 @@ install_tools() {
 	missing=""
 	nc -h 2>&1 | grep -q OpenBSD || missing="$missing netcat-openbsd" 
 	
-	which ss > /dev/null 2>&1 || missing="$missing iproute2" 
+	which ss > /dev/null 2>&1 || missing="$missing iproute2" #throw away all output 
 	which curl > /dev/null 2>&1 || missing="$missing curl" 
 	which jq > /dev/null 2>&1 || missing="$missing jq" 
 	which html2text > /dev/null 2>&1 || missing="$missing html2text" 
@@ -70,7 +70,7 @@ handle_assignment() {
 	cat "$WORK/row.txt" >&2
 	
 	topic=$(sed -n 2p "$WORK/row.txt" | sed 's/.* - //' | cut -d' ' -f1) 
-	points=$(grep '%' "$WORK/row.txt" | head -n 1 | tr -d '%')
+	points=$(grep '%' "$WORK/row.txt" | head -n 1 | tr -d '%') # delete characters 
 	due=$(grep 'Due date:' "$WORK/row.txt" | sed -e 's/Due date: //' -e 's/ at / /') 
 	
 	if [ -z "$title" ] || [ -z "$topic" ] || [ -z "$points" ] || [ -z "$due" ]; then 
