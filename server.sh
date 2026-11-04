@@ -10,4 +10,11 @@ POI_URL="https://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_POI/MapServ
 WORK="$HOME/server_files" #downloads+files sent back 
 FIFO="$WORK/reply.fifo" #pipe 
 
+error() {
+	echo "ERROR: $1" >&2 #print to server terminal
+	echo "EROOR: $1" #sent to client 
+} 
+
+
+
 
