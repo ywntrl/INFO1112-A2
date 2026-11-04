@@ -84,7 +84,7 @@ handle_assignment() {
 } 
 
 handle_population() {
-	curl -s -f -L "$POP_URL" -o :$WORK/STE_1.csv" 
+	curl -s -f -L "$POP_URL" -o "$WORK/STE_1.csv" 
 	if [ $? -ne 0 ]; then 
 		error "could not download population data" 
 		return
