@@ -18,7 +18,7 @@ error() {
 #missing alpine tools 
 install_tools() {
 	missing=""
-	nc -h 2>$1 | grep -1 OpenBSD || missing="$missing netcat-openbsd" 
+	nc -h 2>&1 | grep -q OpenBSD || missing="$missing netcat-openbsd" 
 	
 	which ss > /dev/null 2>&1 || missing="$missing iproute2" 
 	which curl > /dev/null 2>&1 || missing="$missing curl" 
@@ -30,7 +30,7 @@ install_tools() {
 	if [ -n "$missing" ]; then 
 		echo "Installing:$missing"
 		apk add $missing > /dev/null 2>&1
-		if [$? -ne 0 ]; then 
+		if [ $? -ne 0 ]; then 
 			echo "could not install:$missing" 
 		fi 
 	fi 
@@ -49,40 +49,36 @@ handle_assignment() {
 	fi 
 
 	#split each row into own block - html2text mixes table rows together 
+	# turns end of table into ===== line 
+	#deletes tags to prevent html2text reading as table 
+	#every row start with =====
+	#every paragraph = new line 
 	sed 	-e 's#</table>#<hr>#g' \
-		# turns end of table into ==== line 		
-
 		-e 's#</*table[^>]*>##g' \
-		-e '-e 's#</*thead[^>]*>##g' \
+		-e 's#</*thead[^>]*>##g' \
 		-e 's#</*tbody[^>]*>##g' \
-		#deletes tags to prevent html2text reading as table 
-
-        	-e 's#</tr>##g' \
+		-e 's#</tr>##g' \
 		-e 's#<tr[^>]*>#<hr>#g' \
-		#every row start with ===		
-
-        	-e 's#<t[dh][^>]*>#<p>#g' \
+		-e 's#<t[dh][^>]*>#<p>#g' \
 		-e 's#</t[dh]>#</p>#g' \
-		#every paragraph = new line 
-
-        	"$WORK/unit.html" > "$WORK/unit_rows.html" 
-	html2text -nobs -width 250 "$WORK_rows.html" > "$WORK/unit.txt" 
+        "$WORK/unit.html" > "$WORK/unit_rows.html" 
+	html2text -nobs -width 250 "$WORK/unit_rows.html" > "$WORK/unit.txt" 
 
 	title=$(grep "^Assignment [0-9]*$" "$WORK/unit.txt" | tail -n 1) 
 	
-	grep -A 15 "^$title$" "WORK/unit.txt" | sed '/^=====/,$d' | grep -v '^ *$' > "$WORK/row.txt" 
+	grep -A 15 "^$title$" "$WORK/unit.txt" | sed '/^=====/,$d' | grep -v '^ *$' > "$WORK/row.txt" 
 	cat "$WORK/row.txt" >&2
 	
 	topic=$(sed -n 2p "$WORK/row.txt" | sed 's/.* - //' | cut -d' ' -f1) 
-	points=$(grep '%' :$WORK/row.txt" | head -n 1 | tr -d '%')
+	points=$(grep '%' "$WORK/row.txt" | head -n 1 | tr -d '%')
 	due=$(grep 'Due date:' "$WORK/row.txt" | sed -e 's/Due date: //' -e 's/ at / /') 
 	
-	if [ -z "$title"] || [ -z "$topic" ] || [ -z "$points" ] || [ -z "$due" ]; then 
+	if [ -z "$title" ] || [ -z "$topic" ] || [ -z "$points" ] || [ -z "$due" ]; then 
 		error "could not find assingment details" 
 		return 
 	fi 
 
-	echo "{\"title\": \"$title\", \"topic\": \"$topic\", \"due_date\": \"due\", \"points\": $points}" \
+	echo "{\"title\": \"$title\", \"topic\": \"$topic\", \"due_date\": \"due\" \"points\": $points}" \
 		| jq . > "$WORK/assignment.json" 
 	cat "$WORK/assignment.json" 
 } 
@@ -102,7 +98,7 @@ handle_population() {
 	#go through every column 
 	rm -f "$WORK/population.txt" 
 	column=$(echo "$header" | tr ',' '\n' | wc -l)
-	for i in $(seq 1 $columns); do 
+	for i in $(seq 1 $column); do 
 		year=$(echo "$header" | cut -d',' -f$i) 
 		pop=$(echo "$row" | cut -d',' -f$i)
 		if echo "$year" | grep -q '^[0-9][0-9][0-9][0-9]$' && [ -n "$pop" ]; then 
@@ -110,7 +106,7 @@ handle_population() {
 		fi
 	done 
 
-	if [! -s "$WORK/population.txt" ]; then
+	if [ ! -s "$WORK/population.txt" ]; then
 		error "no population numbers found in the csv" 
 		return 
 	fi
