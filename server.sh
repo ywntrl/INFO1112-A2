@@ -87,6 +87,31 @@ handle_assignment() {
 	cat "$WORK/assignment.json" 
 } 
 
+handle_population() {
+	curl -s -f -L "$POP_URL" -o :$WORK/STE_1.csv" 
+	if [ $? -ne 0 ]; then 
+		error "could not download population data" 
+		return
+	fi 
 
+	header=$(head -n 1 "$WORK/STE_1.csv" | tr -d '\r') 
+	row=$(grep "^ERP_P_20," "$WORK/STE_1.csv" | tr -d '\r') 
 
+	#read estimated resident population 
+	
+	#go through every column 
+	rm -f "$WORK/population.txt" 
+	column=$(echo "$header" | tr ',' '\n' | wc -l)
+	for i in $(seq 1 $columns); do 
+		year=$(echo "$header" | cut -d',' -f$i) 
+		pop=$(echo "$row" | cut -d',' -f$i)
+		if echo "$year" | grep -q '^[0-9][0-9][0-9][0-9]$' && [ -n "$pop" ]; then 
+			echo "$year,$pop" >> "$WORK/population.txt" 
+		fi
+	done 
 
+	if [! -s "$WORK/population.txt" ]; then
+		error "no population numbers found in the csv" 
+		return 
+	fi
+	echo "Latest NSW population: $(tail -n 1 "$WORK/population.txt")" >&2 
