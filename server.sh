@@ -40,9 +40,10 @@ handle_assignment() {
 #download unit page, turn text to html2text, find assignment row, pull out values and build json 
 	number="$1" 
 	
-	echo "downloading $UNIT_URL" >&2 
+	echo "downloading $UNIT_URL" >&2 #redirects output to standard error 
 	curl -s -f -L "$UNIT_URL" -o "$WORK/unit.html"
 		#silent, fail if website returns error, L follows redirect, o saves to a file 
+		#saved to server_files/unit.html
 	if [ $? -ne 0 ]; then 
 		error "could not download unit page"
 		return 
@@ -53,7 +54,7 @@ handle_assignment() {
 	#deletes tags to prevent html2text reading as table 
 	#every row start with =====
 	#every paragraph = new line 
-	sed 	-e 's#</table>#<hr>#g' \
+	sed -e 's#</table>#<hr>#g' \
 		-e 's#</*table[^>]*>##g' \
 		-e 's#</*thead[^>]*>##g' \
 		-e 's#</*tbody[^>]*>##g' \
@@ -63,17 +64,26 @@ handle_assignment() {
 		-e 's#</t[dh]>#</p>#g' \
         "$WORK/unit.html" > "$WORK/unit_rows.html" 
 	html2text -nobs -width 250 "$WORK/unit_rows.html" > "$WORK/unit.txt" 
+	#nobs disposes automatic wrapping of long lines 
+	#output width = 250 characters 
 
 	title=$(grep "^Assignment [0-9]*$" "$WORK/unit.txt" | tail -n 1) 
 	
 	grep -A 15 "^$title$" "$WORK/unit.txt" | sed '/^=====/,$d' | grep -v '^ *$' > "$WORK/row.txt" 
+	#assignment title + next 15 lines, deletes everything from a line starting =====, removes empty lines 
 	cat "$WORK/row.txt" >&2
 	
 	topic=$(sed -n 2p "$WORK/row.txt" | sed 's/.* - //' | cut -d' ' -f1) 
+	#print line 2 only 
+	#remove everything up to (including) last matching - 
 	points=$(grep '%' "$WORK/row.txt" | head -n 1 | tr -d '%') # delete characters 
+	#finds line containing % 
 	due=$(grep 'Due date:' "$WORK/row.txt" | sed -e 's/Due date: //' -e 's/ at / /') 
+	#remove due date 
+	#replace 'at' with space
 	
 	if [ -z "$title" ] || [ -z "$topic" ] || [ -z "$points" ] || [ -z "$due" ]; then 
+	#check if string empty 
 		error "could not find assingment details" 
 		return 
 	fi 
@@ -148,6 +158,8 @@ PYTHON
 handle_poi() { 
 	#read coordinates using grep 
 	if echo "$1" | grep -q -E '^-?[0-9.]+,-?[0-9.]+$'; then 
+	# -?: Optional negative sign.
+	# [0-9.]+: One or more digits or decimal points.
 		lat=$(echo "$1" | cut -d',' -f1) 
 		lon=$(echo "$1" | cut -d',' -f2) 
 	else 
@@ -160,7 +172,12 @@ handle_poi() {
 			--data-urlencode "returnGeometry=true" \
 			--data-urlencode "f=json" \
 			"$POI_URL" -o "$WORK/poi.json" 
-
+		#specifies search condition 
+		#requests POI name field 
+		#API return geometric coordinates + name
+		#json response 
+		#send request to nsw poi 
+		
 		lat=$(jq -r '.features[0].geometry.y // empty' "$WORK/poi.json" 2>/dev/null) 
 		lon=$(jq -r '.features[0].geometry.x // empty' "$WORK/poi.json" 2>/dev/null) 
 		
