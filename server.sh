@@ -34,7 +34,38 @@ install_tools() {
 			echo "could not install:$missing" 
 		fi 
 	fi 
+}
 
+handle_assignment() {
+#download unit page, turn text to html2text, find assignment row, pull out values and build json 
+	number="$1" 
+	
+	echo "downloading $UNIT_URL" >&2 
+	curl -s -f -L "$UNIT_URL" -o "$WORK/unit.html"
+		#silent, fail if website returns error, L follows redirect, o saves to a file 
+	if [ $? -ne 0 ]; then 
+		error "could not download unit page"
+		return 
+	fi 
+
+	#split each row into own block - html2text mixes table rows together 
+	sed 	-e 's#</table>#<hr>#g' \
+		# turns end of table into ==== line 		
+
+		-e 's#</*table[^>]*>##g' \
+		-e '-e 's#</*thead[^>]*>##g' \
+		-e 's#</*tbody[^>]*>##g' \
+		#deletes tags to prevent html2text reading as table 
+
+        	-e 's#</tr>##g' \
+		-e 's#<tr[^>]*>#<hr>#g' \
+		#every row start with ===		
+
+        	-e 's#<t[dh][^>]*>#<p>#g' \
+		-e 's#</t[dh]>#</p>#g' \
+		#every paragraph = new line 
+
+        	"$WORK/unit.html" > "$WORK/unit_rows.html" 
 
 
 
