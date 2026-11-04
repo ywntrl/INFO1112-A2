@@ -66,6 +66,26 @@ handle_assignment() {
 		#every paragraph = new line 
 
         	"$WORK/unit.html" > "$WORK/unit_rows.html" 
+	html2text -nobs -width 250 "$WORK_rows.html" > "$WORK/unit.txt" 
+
+	title=$(grep "^Assignment [0-9]*$" "$WORK/unit.txt" | tail -n 1) 
+	
+	grep -A 15 "^$title$" "WORK/unit.txt" | sed '/^=====/,$d' | grep -v '^ *$' > "$WORK/row.txt" 
+	cat "$WORK/row.txt" >&2
+	
+	topic=$(sed -n 2p "$WORK/row.txt" | sed 's/.* - //' | cut -d' ' -f1) 
+	points=$(grep '%' :$WORK/row.txt" | head -n 1 | tr -d '%')
+	due=$(grep 'Due date:' "$WORK/row.txt" | sed -e 's/Due date: //' -e 's/ at / /') 
+	
+	if [ -z "$title"] || [ -z "$topic" ] || [ -z "$points" ] || [ -z "$due" ]; then 
+		error "could not find assingment details" 
+		return 
+	fi 
+
+	echo "{\"title\": \"$title\", \"topic\": \"$topic\", \"due_date\": \"due\", \"points\": $points}" \
+		| jq . > "$WORK/assignment.json" 
+	cat "$WORK/assignment.json" 
+} 
 
 
 
