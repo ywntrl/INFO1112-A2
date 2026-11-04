@@ -142,4 +142,38 @@ plt.close()
 
 #where am i? 
 handle_poi() { 
-	
+	#read coordinates using grep 
+	#curl 
+	#error if no POI found for given name/coordinates 
+
+	#curl - every POI within 500m of given point 
+
+	#list of {name, type} to neighbours.json 
+}
+
+handle_request() { 
+	read request 
+	echo "Request: $request" >&2 
+	if [ "$request" = "assignment" ]; then 
+		handle_assignment
+	elif [ "$request" = "population" ]; then 
+		handle_population 
+	elif echo "$request" | grep -q "^sleep"; then
+		sleep 5 
+		# test b -keep server busy for 5s 
+		echo "done" 
+	else 
+		handle_poi "$request"
+	fi 
+}
+
+
+#IP Address 
+	#grep and sed 
+	#mkdir $work 
+	#rm $fifo 
+	#mkfifo $fifo 
+
+	#if first time = true -> the server is running at $IP, port=... 
+
+	wait 	
