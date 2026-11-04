@@ -134,13 +134,44 @@ plt.xlabel("Year")
 plt.ylabel("Population")
 plt.savefig(sys.argv[2], format="png")
 plt.close()
+PYTHON
 
+	if [ ! -s "$WORK/population.png" ]; then 
+		error "could not create population.png" 
+		return 
+	fi 
+	cat "$WORK/population.png" 
+
+} 
 
 #where am i? 
 handle_poi() { 
 	#read coordinates using grep 
-	#curl 
-	#error if no POI found for given name/coordinates 
+	if echo "$!" | grep -q -E '^-?[0-9.]+,-?[0-9.]+$'; then 
+		lat=$(echo "$1" | cut -d',' -f1) 
+		lon=$(echo "$1" | cut -d',' -f2) 
+	else 
+	
+	#curl - look up POI name for coordinates 
+		name=$(echo "$1" | tr 'a-z' 'A-Z') 
+		curl -s -f -G \ 
+			--data--urlencode "where=poiname='$name'" \
+			--data--urlencode "outFields=poiname" \
+			--data--urlencode "returnGeometry=true" \
+			--data--urlencode "f=json" \
+			"$POI_URL" -o "$WORK/poi.json" 
+
+		lat=$(jk -r '.features[0].geomtry.y // empty' "$WORK/poi.json" 2>/dev/null) 
+		lon=$(jk -r '.features[0].geomtry.x // empty' "$WORK/poi.json" 2>/dev/null) 
+		
+		#error if no POI found for given name/coordinates 
+		if [ -z "$lat" ]; then 
+			error "no POI called "$1" was found" 
+			return 
+		fi 
+	fi 
+	echo "where am I? $1 is at $lat, $lon" >&2 
+	
 
 	#curl - every POI within 500m of given point 
 
