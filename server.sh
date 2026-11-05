@@ -234,15 +234,27 @@ install_tools
 IP=$(ifconfig | grep 'inet ' | grep -v '127.0.0.1' | head -n 1 \
 	| sed 's/addr://' | tr -s ' ' | cut -d' ' -f3)
 
-mkdir -p "$WORK"
+	#display container's network interfaces and ip address 
+	#remove localhost 
+	#select first remaining IP 
+	#remove space and split, select third field 
+
+mkdir -p "$WORK" 
+#Creates the server_files directory if it doesn't already exist
 rm -f "$FIFO"
+#Removes an old FIFO file if one exists 
+#scipt must create new FIFO file 
 mkfifo "$FIFO"
+#create named pipe - communication channel between netcat and request handler 
 
 first_time=yes
 while true; do
 	nc -lvnN "$PORT" < "$FIFO" | handle_request > "$FIFO" &
-
-	#if first time = true -> the server is running at $IP, port=...
+	#start netcat on port 1234 
+	#redirects standard input from FIFO 
+	#redirects the request handler's standard output into the FIFO
+	#client -> netcat -> handle_request -> fifo -> netcat -> client 
+	
 	if [ "$first_time" = yes ]; then
 		sleep 1
 		LISTEN_PORT=$(ss -ltnp | grep '"nc"' | tr -s ' ' | cut -d' ' -f4 | cut -d':' -f2)
@@ -257,7 +269,5 @@ done
 	#mkdir $work 
 	#rm $fifo 
 	#mkfifo $fifo 
-
-	#if first time = true -> the server is running at $IP, port=... 
 
 	wait 	
