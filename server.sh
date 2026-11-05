@@ -228,7 +228,30 @@ handle_request() {
 	fi 
 }
 
+install_tools
 
+#IP Address: grep and sed
+IP=$(ifconfig | grep 'inet ' | grep -v '127.0.0.1' | head -n 1 \
+	| sed 's/addr://' | tr -s ' ' | cut -d' ' -f3)
+
+mkdir -p "$WORK"
+rm -f "$FIFO"
+mkfifo "$FIFO"
+
+first_time=yes
+while true; do
+	nc -lvnN "$PORT" < "$FIFO" | handle_request > "$FIFO" &
+
+	#if first time = true -> the server is running at $IP, port=...
+	if [ "$first_time" = yes ]; then
+		sleep 1
+		LISTEN_PORT=$(ss -ltnp | grep '"nc"' | tr -s ' ' | cut -d' ' -f4 | cut -d':' -f2)
+		echo "The server is running at $IP, port=$LISTEN_PORT"
+		first_time=no
+	fi
+
+	wait
+done
 #IP Address 
 	#grep and sed 
 	#mkdir $work 
