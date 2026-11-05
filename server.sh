@@ -249,18 +249,7 @@ mkfifo "$FIFO"
 
 first_time=yes
 while true; do
-	nc -lvnN "$PORT" < "$FIFO" | handle_request > "$FIFO" &
-	#start netcat on port 1234 
-	#redirects standard input from FIFO 
-	#redirects the request handler's standard output into the FIFO
-	#client -> netcat -> handle_request -> fifo -> netcat -> client 
 	
-	if [ "$first_time" = yes ]; then
-		sleep 1
-		LISTEN_PORT=$(ss -ltnp | grep '"nc"' | tr -s ' ' | cut -d' ' -f4 | cut -d':' -f2)
-		echo "The server is running at $IP, port=$LISTEN_PORT"
-		first_time=no
-	fi
 
 	wait
 done
