@@ -8,16 +8,17 @@ POP_URL="https://dbr.abs.gov.au/processedData/csv/STE_1.csv"
 POI_URL="https://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_POI/MapServer/0/query"
 
 WORK="$HOME/server_files" #downloads+files sent back 
+FIFO="$WORK/reply.fifo" #pipe 
 
 error() {
 	echo "ERROR: $1" >&2 #print to server terminal
-	echo "EROOR: $1" #sent to client 
+	echo "ERROR: $1" #sent to client 
 } 
 
 #missing alpine tools 
 install_tools() {
 	missing=""
-	which socat > /dev/null 2>&1 || missing="$missing socat"
+	nc -h 2>&1 | grep -q OpenBSD || missing="$missing netcat-openbsd" 
 	
 	which ss > /dev/null 2>&1 || missing="$missing iproute2" #throw away all output 
 	which curl > /dev/null 2>&1 || missing="$missing curl" 
@@ -212,7 +213,6 @@ handle_poi() {
 }
 
 handle_request() { 
-	echo "Connection received on $SOCAT_PEERADDR $SOCAT_PEERPORT" >&2
 	read request 
 	echo "Request: $request" >&2 
 	if [ "$request" = "assignment" ]; then 
@@ -241,17 +241,23 @@ IP=$(ifconfig | grep 'inet ' | grep -v '127.0.0.1' | head -n 1 \
 
 mkdir -p "$WORK" 
 #Creates the server_files directory if it doesn't already exist
-export -f error handle_assignment handle_population handle_poi handle_request
-export WORK RADIUS UNIT_URL POP_URL POI_URL
+rm -f "$FIFO"
+#Removes an old FIFO file if one exists 
+#scipt must create new FIFO file 
+mkfifo "$FIFO"
+#create named pipe - communication channel between netcat and request handler 
 
 first_time=yes
 while true; do
-	socat -t 60 TCP4-LISTEN:"$PORT",reuseaddr EXEC:"bash -c handle_request" &
-	#socat listens for one client on $PORT and connects it to handle_request
+	nc -lvnN "$PORT" < "$FIFO" | handle_request > "$FIFO" &
+	#start netcat on port 1234 
+	#redirects standard input from FIFO 
+	#redirects the request handler's standard output into the FIFO
+	#client -> netcat -> handle_request -> fifo -> netcat -> client 
 	
 	if [ "$first_time" = yes ]; then
 		sleep 1
-		LISTEN_PORT=$(ss -ltnp | grep '"socat"' | tr -s ' ' | cut -d' ' -f4 | cut -d':' -f2)
+		LISTEN_PORT=$(ss -ltnp | grep '"nc"' | tr -s ' ' | cut -d' ' -f4 | cut -d':' -f2)
 		echo "The server is running at $IP, port=$LISTEN_PORT"
 		first_time=no
 	fi
