@@ -264,10 +264,4 @@ while true; do
 
 	wait
 done
-#IP Address 
-	#grep and sed 
-	#mkdir $work 
-	#rm $fifo 
-	#mkfifo $fifo 
 
-	wait 	
