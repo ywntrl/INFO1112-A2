@@ -191,8 +191,25 @@ handle_poi() {
 	
 
 	#curl - every POI within 500m of given point 
+	curl -s -f -G \
+		--data-urlencode "geometry=$lon,$lat" \
+		--data-urlencode "geometryType=esriGeometryPoint" \
+		--data-urlencode "inSR=4283" \
+		--data-urlencode "distance=$RADIUS" \
+		--data-urlencode "units=esriSRUnit_Meter" \
+		--data-urlencode "outFields=poiname,poitype" \
+		--data-urlencode "f=json" \
+		"$POI_URL" -o "$WORK/around.json"
+	if [ $? -ne 0 ]; then
+		error "could not reach the NSW POI API"
+		return
+	fi
 
-	#list of {name, type} to neighbours.json 
+	#list of {name, type} to neighbours.json
+	jq '[.features[] | {name: .attributes.poiname, type: .attributes.poitype}]' \
+		"$WORK/around.json" > "$WORK/neighbours.json"
+	cat "$WORK/neighbours.json" >&2
+	cat "$WORK/neighbours.json"
 }
 
 handle_request() { 
