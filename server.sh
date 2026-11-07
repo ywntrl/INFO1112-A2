@@ -18,7 +18,7 @@ error() {
 #missing alpine tools 
 install_tools() {
 	missing=""
-	nc -h 2>&1 | grep -q OpenBSD || missing="$missing netcat-openbsd" 
+	which socat > /dev/null 2>&1 || missing="$missing socat" 
 	
 	which ss > /dev/null 2>&1 || missing="$missing iproute2" #throw away all output 
 	which curl > /dev/null 2>&1 || missing="$missing curl" 
@@ -37,8 +37,7 @@ install_tools() {
 }
 
 handle_assignment() {
-#download unit page, turn text to html2text, find assignment row, pull out values and build json 
-	number="$1" 
+#download unit page, turn text to html2text, find assignment row, pull out values and build json
 	
 	echo "downloading $UNIT_URL" >&2 #redirects output to standard error 
 	curl -s -f -L "$UNIT_URL" -o "$WORK/unit.html"
@@ -213,8 +212,25 @@ handle_poi() {
 }
 
 handle_request() { 
+
+	ip="$SOCAT_PEERADDR"
+	echo "COnnection received on $ip $SOCAT_PEERPORT" >&2 
+	
 	read request 
 	echo "Request: $request" >&2 
+
+	ip_file="$WORK/$ip.busy"
+	if [ -e "$ip_file" ]; then 
+		echo "Rejected $ip, busy with previous request" >&2 
+		echo "ERROR: request rejected" 
+		return 
+	fi 
+	touch "$ip_file" 
+
+	WORK="$WORK/$ip" 
+	mkdir -p "$WORK" 
+
+	
 	if [ "$request" = "assignment" ]; then 
 		handle_assignment
 	elif [ "$request" = "population" ]; then 
@@ -226,6 +242,8 @@ handle_request() {
 	else 
 		handle_poi "$request"
 	fi 
+
+	rm -f "$ip_file" 
 }
 
 install_tools
@@ -240,17 +258,9 @@ IP=$(ifconfig | grep 'inet ' | grep -v '127.0.0.1' | head -n 1 \
 	#remove space and split, select third field 
 
 mkdir -p "$WORK" 
-#Creates the server_files directory if it doesn't already exist
-rm -f "$FIFO"
-#Removes an old FIFO file if one exists 
-#scipt must create new FIFO file 
-mkfifo "$FIFO"
-#create named pipe - communication channel between netcat and request handler 
+rm -f "$WORK"/*.busy
 
-first_time=yes
-while true; do
-	
+export -f error handle_assignment handle_population handle_poi handle_request 
+export WORK RADIUS UNIT_URL POP_URL POI_URL
 
-	wait
-done
-
+wait 
