@@ -8,39 +8,15 @@ POP_URL="https://dbr.abs.gov.au/processedData/csv/STE_1.csv"
 POI_URL="https://maps.six.nsw.gov.au/arcgis/rest/services/public/NSW_POI/MapServer/0/query"
 
 WORK="$HOME/server_files" #downloads+files sent back 
-FIFO="$WORK/reply.fifo" #pipe 
 
 error() {
 	echo "ERROR: $1" >&2 #print to server terminal
 	echo "ERROR: $1" #sent to client 
 } 
 
-#missing alpine tools 
-install_tools() {
-	missing=""
-	which socat > /dev/null 2>&1 || missing="$missing socat" 
-	
-	which ss > /dev/null 2>&1 || missing="$missing iproute2" #throw away all output 
-	which curl > /dev/null 2>&1 || missing="$missing curl" 
-	which jq > /dev/null 2>&1 || missing="$missing jq" 
-	which html2text > /dev/null 2>&1 || missing="$missing html2text" 
-	which python3 > /dev/null 2>&1 || missing="$missing python3" 
-	python3 -c "import matplotlib" > /dev/null 2>&1 || missing="$missing py3-matplotlib" 
-
-	if [ -n "$missing" ]; then 
-		echo "Installing:$missing"
-		apk add $missing > /dev/null 2>&1
-		if [ $? -ne 0 ]; then 
-			echo "could not install:$missing" 
-		fi 
-	fi 
-}
-
 handle_assignment() {
 #download unit page, turn text to html2text, find assignment row, pull out values and build json
-	
-	echo "downloading $UNIT_URL" >&2 #redirects output to standard error 
-	curl -s -f -L "$UNIT_URL" -o "$WORK/unit.html"
+		curl -s -f -L "$UNIT_URL" -o "$WORK/unit.html"
 		#silent, fail if website returns error, L follows redirect, o saves to a file 
 		#saved to server_files/unit.html
 	if [ $? -ne 0 ]; then 
@@ -177,11 +153,11 @@ handle_poi() {
 		#json response 
 		#send request to nsw poi 
 		
-		lat=$(jq -r '.features[0].geometry.y // empty' "$WORK/poi.json" 2>/dev/null) 
-		lon=$(jq -r '.features[0].geometry.x // empty' "$WORK/poi.json" 2>/dev/null) 
+		lat=$(jq -r '.features[0].geometry.y' "$WORK/poi.json") 
+		lon=$(jq -r '.features[0].geometry.x' "$WORK/poi.json") 
 		
 		#error if no POI found for given name/coordinates 
-		if [ -z "$lat" ]; then 
+		if [ "$lat" = "null" ] || [ -z "$lat" ]; then 
 			error "no POI called '$1' was found" 
 			return 
 		fi 
@@ -207,8 +183,7 @@ handle_poi() {
 	#list of {name, type} to neighbours.json
 	jq '[.features[] | {name: .attributes.poiname, type: .attributes.poitype}]' \
 		"$WORK/around.json" > "$WORK/neighbours.json"
-	cat "$WORK/neighbours.json" >&2
-	cat "$WORK/neighbours.json"
+	cat "$WORK/neighbours.json" 
 }
 
 handle_request() { 
@@ -226,10 +201,6 @@ handle_request() {
 		return 
 	fi 
 	touch "$ip_file" 
-
-	WORK="$WORK/$ip" 
-	mkdir -p "$WORK" 
-
 	
 	if [ "$request" = "assignment" ]; then 
 		handle_assignment
@@ -246,8 +217,12 @@ handle_request() {
 	rm -f "$ip_file" 
 }
 
-install_tools
+if [ "$1" = "request" ]; then 
+	handle_request 
+	exit 
+fi 
 
+apk add socat iproute2 curl jq html2text pythono3 py3-matplotlib > /dev/null 2>&1 
 #IP Address: grep and sed
 IP=$(ifconfig | grep 'inet ' | grep -v '127.0.0.1' | head -n 1 \
 	| sed 's/addr://' | tr -s ' ' | cut -d' ' -f3)
@@ -260,7 +235,10 @@ IP=$(ifconfig | grep 'inet ' | grep -v '127.0.0.1' | head -n 1 \
 mkdir -p "$WORK" 
 rm -f "$WORK"/*.busy
 
-export -f error handle_assignment handle_population handle_poi handle_request 
-export WORK RADIUS UNIT_URL POP_URL POI_URL
+socat -t 60 TCP4-LISTEN:$PORT,reuseaddr,fork EXEC:"bash $0 request" & 
+
+sleep 1 
+LISTEN_PORT=$(ss -ltnp | grep socat | tr - s ' ' | cut -d' ' -f4 | cut -d':' -f2) 
+echo "The server is running at $ip, port=$LISTENING_PORT" 
 
 wait 
