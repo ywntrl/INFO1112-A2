@@ -57,5 +57,8 @@ pip install matplotlib
 
 
 
+REFERENCE LIST 
+Amoany, E. (2020, June 25). Getting started with socat, a multipurpose relay
+   tool for Linux. Red Hat Blog. https://www.redhat.com/en/blog/getting-started-socat
 
 
