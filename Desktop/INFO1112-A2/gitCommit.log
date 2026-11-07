@@ -1,0 +1,155 @@
+commit 2b0418fbc1f3af4764ebf3630842500f4a42914b
+Author: yingying wan <yingyingwan@yingyings-MacBook-Air-3.local>
+Date:   Sat Nov 7 13:14:14 2026 +1100
+
+    Use socat and IP-file logic
+
+commit f328510aee00383cf02fcaa8ab3f14a099f3e58e
+Author: yingying wan <yingyingwan@yingyings-MacBook-Air-3.local>
+Date:   Sat Nov 7 13:04:16 2026 +1100
+
+    update
+
+commit 67311dac272cffa3659fa3491f9318e07e21b1fe
+Author: yingying wan <yingyingwan@yingyings-MacBook-Air-3.local>
+Date:   Sat Nov 7 12:59:26 2026 +1100
+
+    update server.sh
+
+commit 6b967dc0fa2e0b05be444049571184c241c0c59a
+Author: Yingying Wan <serenaw1007@gmail.com>
+Date:   Sat Nov 7 12:42:57 2026 +1100
+
+    use socat
+
+commit 22a5c2a6dff260372ed753cffc4f6aa21ab4a307
+Author: Yingying Wan <serenaw1007@gmail.com>
+Date:   Thu Nov 5 11:30:29 2026 +1100
+
+    Update server.sh
+
+commit c0797720e9ece3b36d831a906190f2c39500fe6f
+Author: Yingying Wan <serenaw1007@gmail.com>
+Date:   Thu Nov 5 11:25:02 2026 +1100
+
+    Update server.sh
+
+commit 482209b45cb46c292192d426cd1b204973596774
+Author: Yingying Wan <serenaw1007@gmail.com>
+Date:   Thu Nov 5 11:24:01 2026 +1100
+
+    recover previous code
+
+commit c18fcef1034edd62ed84a63c2a93815c62dc5fed
+Author: Yingying Wan <serenaw1007@gmail.com>
+Date:   Thu Nov 5 11:14:45 2026 +1100
+
+    replace with socat
+
+commit a4188d5515e3d0cdccd51819f17897ab89eea416
+Author: Yingying Wan <serenaw1007@gmail.com>
+Date:   Thu Nov 5 11:10:43 2026 +1100
+
+    Update server.sh
+
+commit 09a2918b1ed684c58d4a5ddb6bef9f958cd0500d
+Author: Yingying Wan <serenaw1007@gmail.com>
+Date:   Thu Nov 5 11:02:54 2026 +1100
+
+    Update server.sh
+
+commit 550c4c3c46a5ef93426b84f23cfd18bc4a0e733f
+Author: Yingying Wan <serenaw1007@gmail.com>
+Date:   Thu Nov 5 11:02:03 2026 +1100
+
+    Update server.sh
+
+commit d9ea22e2cde4cb8c7c0dede8d57bd0922a4bb770
+Author: Yingying Wan <serenaw1007@gmail.com>
+Date:   Thu Nov 5 10:56:47 2026 +1100
+
+    Update server.sh
+
+commit d71650e95e2a3dd7d51b49d5b17c7787e5018973
+Author: Yingying Wan <serenaw1007@gmail.com>
+Date:   Thu Nov 5 10:37:46 2026 +1100
+
+    troubleshoot server.sh
+
+commit fd56dfb473ce5ddd4cfadab2bbe4907ef9529033
+Author: Yingying Wan <serenaw1007@gmail.com>
+Date:   Thu Nov 5 10:35:01 2026 +1100
+
+    Update server.sh
+
+commit e082b96a9d9af0f55ea70d7647e3a28bc15ea7b8
+Author: Yingying Wan <serenaw1007@gmail.com>
+Date:   Thu Nov 5 10:34:29 2026 +1100
+
+    add comments
+
+commit 9a54e92b52eacb08ab612b10a523caa3154055b5
+Author: Yingying Wan <serenaw1007@gmail.com>
+Date:   Thu Nov 5 10:28:05 2026 +1100
+
+    Update server.sh
+
+commit f17f41a8694c4d399ee5ac9ca89d504d85cfde00
+Author: Yingying Wan <serenaw1007@gmail.com>
+Date:   Thu Nov 5 10:20:22 2026 +1100
+
+    Update server.sh
+
+commit 62e748fe9d561c072616b23f23fe441e70d2c3d6
+Author: yingying wan <yingyingwan@yingyings-MacBook-Air-3.local>
+Date:   Thu Nov 5 09:18:11 2026 +1100
+
+    handle request + plan for remaining code
+
+commit bc895fcedc0cbf5a9e12f85e016cc2a22e6de7ec
+Author: yingying wan <yingyingwan@yingyings-MacBook-Air-3.local>
+Date:   Thu Nov 5 09:04:07 2026 +1100
+
+    python code
+
+commit bfee6af9608bf260fa0abcd1b3dc38e5bf9932ae
+Author: yingying wan <yingyingwan@yingyings-MacBook-Air-3.local>
+Date:   Thu Nov 5 08:37:28 2026 +1100
+
+    nsw population code
+
+commit 0447bcbed11d5933d3cc75ad846fdddc709af339
+Author: yingying wan <yingyingwan@yingyings-MacBook-Air-3.local>
+Date:   Thu Nov 5 08:20:09 2026 +1100
+
+    reading html2text into json (assignment handling)
+
+commit f3b2ef0fe725c2d9620d6a3a51505759f3391d15
+Author: yingying wan <yingyingwan@yingyings-MacBook-Air-3.local>
+Date:   Thu Nov 5 07:37:49 2026 +1100
+
+    html2text
+
+commit aacae4cab250392ac3113c52cde5ff148d9e9186
+Author: yingying wan <yingyingwan@yingyings-MacBook-Air-3.local>
+Date:   Thu Nov 5 07:06:24 2026 +1100
+
+    alpine tools installation
+
+commit d35ef6fea246719372929617353c37b85368408a
+Author: yingying wan <yingyingwan@yingyings-MacBook-Air-3.local>
+Date:   Thu Nov 5 06:52:53 2026 +1100
+
+    error function
+
+commit 6db38bd5be76428aec1ed13d5892fddf231c20d7
+Author: yingying wan <yingyingwan@yingyings-MacBook-Air-3.local>
+Date:   Thu Nov 5 06:50:51 2026 +1100
+
+    define variables
+
+commit 60239404c3ef554bdf02ecf5452d6d2dbd8a8c69
+Author: yingying wan <yingyingwan@Mac.gateway>
+Date:   Wed Nov 4 12:03:40 2026 +1100
+
+    first commit
