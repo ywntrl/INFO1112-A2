@@ -87,7 +87,7 @@ handle_assignment() {
 		return 
 	fi 
 
-	echo "{\"title\": \"$title\", \"topic\": \"$topic\", \"due_date\": \"$due\" \"points\": $points}" \
+	echo "{\"title\": \"$title\", \"topic\": \"$topic\", \"due_date\": \"$due\", \"points\": $points}" \
 		| jq . > "$WORK/assignment.json" 
 	cat "$WORK/assignment.json" 
 } 
@@ -214,7 +214,7 @@ handle_poi() {
 handle_request() { 
 
 	ip="$SOCAT_PEERADDR"
-	echo "COnnection received on $ip $SOCAT_PEERPORT" >&2 
+	echo "Connection received on $ip $SOCAT_PEERPORT" >&2 
 	
 	read request 
 	echo "Request: $request" >&2 
@@ -263,7 +263,7 @@ rm -f "$WORK"/*.busy
 export -f error handle_assignment handle_population handle_poi handle_request 
 export WORK RADIUS UNIT_URL POP_URL POI_URL
 
-socat -t 60 TCP4-LISTEN: "$PORT",reuseaddr,fork EXEC:"nash -c handle_request" & 
+socat -t 60 TCP4-LISTEN:"$PORT",reuseaddr,fork EXEC:"bash -c handle_request" & 
 
 sleep 1 
 LISTEN_PORT=$(ss -ltnp | grep '"socat"' | tr -s ' ' | cut -d' ' -f4 | cut -d':' -f2) 
