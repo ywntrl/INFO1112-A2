@@ -263,4 +263,9 @@ rm -f "$WORK"/*.busy
 export -f error handle_assignment handle_population handle_poi handle_request 
 export WORK RADIUS UNIT_URL POP_URL POI_URL
 
+socat -t 60 TCP4-LISTEN: "$PORT",reuseaddr,fork EXEC:"nash -c handle_request" & 
+
+sleep 1 
+LISTEN_PORT=$(ss -ltnp | grep '"socat"' | tr -s ' ' | cut -d' ' -f4 | cut -d':' -f2) 
+echo "The server is running at $IP, port=$LISTEN_PORT" 
 wait 
